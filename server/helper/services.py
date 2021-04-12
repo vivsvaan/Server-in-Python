@@ -1,5 +1,14 @@
 import socket
 import logging
+import datetime
+import server.helper.utils as utils
+from server.helper.consts import (
+    NUMBER_OF_SIMULTANEOUS_CLIENTS, DEFAULT_HEARTBEAT_INTERVAL,
+    BUFFER_SIZE, HEARTBEAT_INTERVAL_MULTIPLIER
+)
+from server.helper.enums import (
+    MessageRequestType, ClientStatus
+)
 
 
 class TCPService:
@@ -33,7 +42,76 @@ class TCPService:
             logging.info("Server is Up" +
                          "IP: ", self.host,
                          "Port: ", self.port)
+            print("Server is Up" + "IP: ", self.host, "Port: ", self.port)
         except Exception as e:
             logging.error(e)
             raise e
 
+
+class ClientService(TCPService):
+    """
+    Every Communication from/to client must happen through here
+    """
+    def __init__(self, host, port):
+        super().__init__(host, port)
+        self.client = None
+        self.client_address = None
+        self.heartbeat_timestamp = 0
+        self.heartbeat_interval = DEFAULT_HEARTBEAT_INTERVAL
+
+    def start_server(self, clients=1):
+        """
+        Starts the Python Server
+        :param clients: configure how many clients the server can listen to simultaneously
+        """
+        self.create_server()
+        self.start_listening(clients)
+
+    def read_message(self):
+        """
+        Reads the message received from Client
+        :return: False (if message is null or Heartbeat)
+        :return: ClientStatus (if message is Connect or Disconnect Request)
+        :return: else decoded message
+        """
+        message = self.client.recv(BUFFER_SIZE)
+        if not message or message == b'':
+            if self.heartbeat_timestamp and (
+                    self.heartbeat_timestamp < (
+                    datetime.datetime.now() - datetime.timedelta(seconds=self.heartbeat_interval))):
+                return ClientStatus.disconnedted.value
+            return False
+        message = utils.deserialize(message)
+
+        if message.msg_type == MessageRequestType.connect.value:
+            self.heartbeat_timestamp = datetime.datetime.now()
+            self.heartbeat_interval = int(message.heartbeat_interval*HEARTBEAT_INTERVAL_MULTIPLIER)
+            self.send_connection_response(is_success=True)
+            return ClientStatus.connected.value
+        elif message.msg_type == MessageRequestType.disconnect.value:
+            return ClientStatus.disconnedted.value
+
+        elif message.msg_type == MessageRequestType.heartbeat.value:
+            self.heartbeat_timestamp = datetime.datetime.now()
+            return False
+
+        elif message.msg_type == MessageRequestType.message.value:
+            return message
+
+        return False
+
+    def send_message(self, message, serialized=False):
+        data = message
+        if not serialized:
+            data = utils.serialize(data)
+        self.client.send(data)
+        logging.info("""
+        __________ SENDING DATA TO CLIENT __________
+        Message : {message}
+        ____________________________________________
+        """.format(message=message))
+
+    def send_connection_response(self, is_success=False):
+        logging.info("Sending Connection Response: ", is_success)
+        conn_res = "is_connected: True"
+        self.send_message(conn_res)
