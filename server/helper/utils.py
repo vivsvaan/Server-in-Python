@@ -1,3 +1,10 @@
+import configparser
+
+
+def read_conf(filename):
+    config = configparser.ConfigParser()
+    config.read(filename)
+    return config
 
 
 def serialize(data):
