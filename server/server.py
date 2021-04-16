@@ -28,8 +28,6 @@ try:
 
         logging.info('Connected to Client at: {}'.format(client_service.client_address))
 
-        # start thread
-
         while True:
             """
             While loop to keep reading and processing messages from client
@@ -42,7 +40,9 @@ try:
             if message == ClientStatus.connected.value:
                 connected = True
                 continue
-            # process message data
+
+            # process message data and return response
+            client_service.send_custom_response(message)
 
         logging.info('Client Disconnected')
         client_service.client.close()

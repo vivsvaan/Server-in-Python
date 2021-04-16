@@ -152,3 +152,12 @@ class ClientService(TCPService):
         logging.info("Sending Connection Response: ", is_success)
         conn_res = "is_connected: True"
         self.send_message(conn_res)
+
+    def send_custom_response(self, message):
+        """
+        Send the response to client
+        :param message: message to be sent
+        """
+
+        logging.info("Sending Custom Response: ", message)
+        self.send_message(message)
