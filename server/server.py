@@ -2,20 +2,40 @@
 import logging
 
 from server.helper.enums import ClientStatus
-from server.helper.services import ClientService
+from server.helper.services import ClientService, TCPService
 from server.helper.utils import read_conf
 
-logging.getLogger()
-logging.basicConfig(filename='server_logs.txt', level=logging.DEBUG)
 
-logging.info('---------- STARTING SERVER ----------')
-print('---------- STARTING SERVER ----------')
+class Server(TCPService):
+    def __init__(self):
+        logging.getLogger()
+        logging.basicConfig(filename='server_logs.txt', level=logging.DEBUG)
 
-config = read_conf('server.conf')
+        logging.info('---------- STARTING SERVER ----------')
+        print('---------- STARTING SERVER ----------')
 
-client_service = ClientService(config.server_host, config.server_port)
+        config = read_conf('server.conf')
+        super().__init__(config.host, config.port)
 
-client_service.start_server()
+    def run_server(self, clients=1):
+        """
+        Starts the Python Server
+        :param clients: configure how many clients the server can listen to simultaneously
+        """
+
+        self.create_server()
+        self.start_listening(clients)
+
+        try:
+            while True:
+                """
+                While loop to keep listening and accept new connections if no client is connected
+                """
+                logging.info('Server is Listening...')
+
+
+
+
 
 try:
     while True:
@@ -56,5 +76,3 @@ except Exception as e:
 
 logging.info('---------- SERVER STOPPED ----------')
 print('---------- SERVER STOPPED ----------')
-
-
