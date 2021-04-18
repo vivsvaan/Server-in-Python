@@ -1,3 +1,5 @@
+# services.py
+
 import socket
 import logging
 import datetime
@@ -71,14 +73,6 @@ class ClientService(TCPService):
         server will drop that client's connection.
         """
 
-    def start_server(self, clients=1):
-        """
-        Starts the Python Server
-        :param clients: configure how many clients the server can listen to simultaneously
-        """
-
-        self.create_server()
-        self.start_listening(clients)
 
     def read_message(self):
         """
