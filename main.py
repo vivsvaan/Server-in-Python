@@ -1,6 +1,7 @@
 # main.py
 
-from server.server import Server
+from server.manager import ServerManager
+from client.manager import ClientManager
 
-
-Server().run_server()
+ServerManager().start()
+ClientManager.start()
