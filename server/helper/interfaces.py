@@ -24,8 +24,8 @@ class ClientInterface:
         self.heartbeat_interval = DEFAULT_HEARTBEAT_INTERVAL
         """
         Note - Heartbeat is an empty message which clients sends to the server stating that client is still connected.
-        In case client disconnects without telling the server, 
-        server will drop that client's connection.
+        In case client disconnects without notifying the server, 
+        server will drop that client's connection using heartbeat.
         """
 
     def read_message(self):

@@ -1,10 +1,12 @@
 # services.py
-
+import queue
 import socket
 import logging
+import multiprocessing
 from server.helper.consts import (
-    NUMBER_OF_SIMULTANEOUS_CLIENTS,
+    NUMBER_OF_SIMULTANEOUS_CLIENTS, READ_QUEUE_SIZE, WRITE_QUEUE_SIZE,
 )
+from server.helper.enums import ClientStatus
 
 
 class TCPService:
@@ -25,10 +27,11 @@ class TCPService:
         Creates a Server
         """
 
-        logging.info("Creating Server")
+        logging.info("Creating Server...")
         try:
             self.soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.soc.bind((self.host, self.port))  # bind host and port together
+            logging.info("Server Created")
         except Exception as e:
             logging.error(e)
             raise e
