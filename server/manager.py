@@ -1,14 +1,14 @@
-# server.py
+# manager.py
 
 import logging
 
 from server.helper.enums import ClientStatus
-from server.helper.services import TCPService
+from server.helper.services import TCPService, MessageProcessingService
 from server.helper.interfaces import ClientInterface
 from server.helper.utils import read_conf
 
 
-class Server(TCPService):
+class ServerManager(TCPService):
     def __init__(self, host=None, port=None):
         logging.getLogger()
         logging.basicConfig(filename='server_logs.txt', level=logging.DEBUG)
@@ -23,7 +23,7 @@ class Server(TCPService):
         self.host, self.port = host, int(port)
         super().__init__(self.host, self.port)
 
-    def run_server(self, clients=1):
+    def start(self, clients=1):
         """
         Starts the Python Server
         :param clients: configure how many clients the server can listen to simultaneously
@@ -31,24 +31,24 @@ class Server(TCPService):
 
         self.create_server()
         self.start_listening(clients)
+        is_connected = False
+        client_interface = None
 
         try:
             while True:
-                """
-                While loop to keep listening and accept new connections if no client is connected
-                """
-                logging.info('Server is Listening...')
+                if not is_connected:
+                    logging.info('Waiting for a client to connect...')
 
-                client, addr = self.soc.accept()  # accept a new connection
+                    client, addr = self.soc.accept()  # accept a new connection
+                    client_interface = ClientInterface(client, addr)
 
-                client_interface = ClientInterface(client, addr)
+                    logging.info('Connected to Client at: {}'.format(client_interface.client_address))
+                    is_connected = True
+                    processing_service = MessageProcessingService(client_interface)
+                    processing_service
+                    continue
 
-                logging.info('Connected to Client at: {}'.format(client_interface.client_address))
-
-                while True:
-                    """
-                    While loop to keep reading and processing messages from client
-                    """
+                else:
                     message = client_interface.read_message()
                     if not message:
                         continue
