@@ -93,3 +93,52 @@ class MessageProcessingService:
         self.read_thread.join()
         self.process_thread.join()
         self.write_thread.join()
+    
+    def read_message(self):
+        """
+        Reads Messages from client and puts them into read queue
+        """
+        try:
+            while not self._terminate:
+                if not self.client_interface:
+                    logging.error('No client interface found. Aborting Message Processing.')
+                    self.terminate()
+                    break
+                message = self.client_interface.read_message()
+                if not message:
+                    continue
+                if message == ClientStatus.disconnected.value:
+                    logging.info('Client Disconnected. Aborting Message Processing.')
+                    self.terminate()
+                    break
+                if message == ClientStatus.connected.value:
+                    continue
+
+                try:
+                    self.read_queue.put_nowait(message)
+                except queue.Full:
+                    logging.error('Read Queue Full.\nDropping data...')
+        except Exception as e:
+            logging.error('read_message_thread {}'.format(e))
+        logging.info('Stopping read_message thread...')
+
+    def process_message(self):
+        """
+        Processes the messages from read queue and puts them into write queue
+        """
+        try:
+            while not self._terminate:
+                message = self.read_queue.get_nowait()
+
+                # process message here
+                processed_message = message
+                self.write_queue.put(processed_message)
+        except Exception as e:
+            logging.error('process_message_thread {}'.format(e))
+        logging.info('Stopping process_message thread...')
+
+    def write_message(self):
+        """
+        Sends the messages from write queue to client
+        """
+        pass
