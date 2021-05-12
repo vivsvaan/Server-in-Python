@@ -1,3 +1,3 @@
 # Server in Python
-A simple Server implemented in Python using Multi-Processing
+A simple Multi-Processing Server implementation in Python.
 
