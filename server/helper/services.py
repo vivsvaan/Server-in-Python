@@ -44,10 +44,14 @@ class TCPService:
 
         try:
             self.soc.listen(clients)
-            logging.info("Server is Up" +
-                         "IP: ", self.host,
-                         "Port: ", self.port)
-            print("Server is Up" + "IP: ", self.host, "Port: ", self.port)
+            logging.info("""Server is Up.
+            IP: {host}
+            Port: {port}
+            """.format(host=self.host, port=self.port))
+            print("""Server is Up.
+            IP: {host}
+            Port: {port}
+            """.format(host=self.host, port=self.port))
         except Exception as e:
             logging.error(e)
             raise e
@@ -59,7 +63,7 @@ class MessageProcessingService:
         self.client_interface = client_interface
         self.read_thread = multiprocessing.Process(target=self.read_message)
         self.process_thread = multiprocessing.Process(target=self.process_message)
-        self.write_thread = multiprocessing.Process(target=self.send_message)
+        self.write_thread = multiprocessing.Process(target=self.write_message)
         self.read_queue = multiprocessing.Queue(maxsize=READ_QUEUE_SIZE)
         self.write_queue = multiprocessing.Queue(maxsize=WRITE_QUEUE_SIZE)
         self._terminate = False
