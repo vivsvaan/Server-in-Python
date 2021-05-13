@@ -45,22 +45,11 @@ class ServerManager(TCPService):
                     logging.info('Connected to Client at: {}'.format(client_interface.client_address))
                     is_connected = True
                     processing_service = MessageProcessingService(client_interface)
-                    processing_service
+                    processing_service.__enter__()
                     continue
 
                 else:
-                    message = client_interface.read_message()
-                    if not message:
-                        continue
-                    if message == ClientStatus.disconnected.value:
-                        break
-                    if message == ClientStatus.connected.value:
-                        continue
-
-                    # process message data and return response
-                    client_interface.send_custom_response(message)
-
-                logging.info('Client Disconnected')
+                   pass
                 client_interface.client.close()
                 client_interface.client = None
                 client_interface.client_address = None
