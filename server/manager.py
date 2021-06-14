@@ -32,7 +32,6 @@ class ServerManager(TCPService):
         self.create_server()
         self.start_listening(clients)
         is_connected = False
-        client_interface = None
 
         try:
             while True:
@@ -46,14 +45,8 @@ class ServerManager(TCPService):
                     is_connected = True
                     processing_service = MessageProcessingService(client_interface)
                     processing_service.__enter__()
-                    continue
-
-                else:
-                   pass
-                client_interface.client.close()
-                client_interface.client = None
-                client_interface.client_address = None
-                client_interface.heartbeat_timestamp = 0
+                elif processing_service.is_terminated:
+                    is_connected = False
 
         except Exception as e:
             logging.error(e)

@@ -66,7 +66,7 @@ class MessageProcessingService:
         self.write_thread = multiprocessing.Process(target=self.write_message)
         self.read_queue = multiprocessing.Queue(maxsize=READ_QUEUE_SIZE)
         self.write_queue = multiprocessing.Queue(maxsize=WRITE_QUEUE_SIZE)
-        self._terminate = False
+        self.is_terminated = False
 
     def __enter__(self):
         self.start()
@@ -84,7 +84,7 @@ class MessageProcessingService:
 
     def terminate(self):
         logging.info('Terminating Threads...')
-        self._terminate = True
+        self.is_terminated = True
         if self.read_thread:
             self.read_thread.terminate()
         if self.process_thread:
@@ -103,7 +103,7 @@ class MessageProcessingService:
         Reads Messages from client and puts them into read queue
         """
         try:
-            while not self._terminate:
+            while not self.is_terminated:
                 if not self.client_interface:
                     logging.error('No client interface found. Aborting Message Processing.')
                     self.terminate()
@@ -131,7 +131,7 @@ class MessageProcessingService:
         Processes the messages from read queue and puts them into write queue
         """
         try:
-            while not self._terminate:
+            while not self.is_terminated:
                 message = self.read_queue.get_nowait()
 
                 # process message here

@@ -61,6 +61,7 @@ class ClientInterface:
             return ClientStatus.connected.value
 
         elif message.msg_type == MessageRequestType.disconnect.value:
+            self.client.close()
             return ClientStatus.disconnedted.value
 
         elif message.msg_type == MessageRequestType.heartbeat.value:
